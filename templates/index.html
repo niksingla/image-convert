@@ -1,0 +1,178 @@
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Converter</title>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+
+
+    <link rel="stylesheet" href="{% static 'convert/css/style.css' %}">
+
+</head>
+<style>
+    @keyframes slideInFromLeft {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(0);
+        }
+    }
+    .upload-container {
+        position: relative;
+        color: black;
+    }
+
+    .upload-container input {
+        border: 1px solid #92b0b3;
+        background: #f1f1f1;
+        outline: 2px dashed #92b0b3;
+        outline-offset: -10px;
+        padding-top: 100px;
+        padding-bottom: 100px;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        text-align: center !important;
+
+    }
+
+    .upload-container input:hover {
+        background: #ddd;
+    }
+
+    .upload-container:before {
+        position: relative;
+        top: 200px;
+        content: "Drag n Drop files here.";
+        color: #ffffff5e;
+        font-weight: 900;
+    }
+    .conversion-success{
+        animation: 1s ease-out 0s 1 slideInFromLeft;
+    }
+    @media only screen and (max-width: 500px) {
+        .upload-container:before {
+            display: none;
+        }
+    }
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#upload-btn').click(function (e) {
+            console.log('form btn clicked...')
+            var files = document.getElementById('formFileSm').files;
+            if (files.length == 0) {
+                alert("Please first choose or drop any file(s)...");
+                return;
+            }
+            var filenames = "";
+            for (var i = 0; i < files.length; i++) {
+                filenames += files[i].name + "\n";
+            }
+            if ($('select.form-select').val() == '') {
+                alert('Select valid options to convert...')
+                return false
+            }
+            document.querySelector('[name="file_field"]').files = document.getElementById('formFileSm').files
+            var form = $('form.main-image-form');
+            $(".main-image-form input[name='convert_to']").val($('select.form-select').val());
+            form.submit()
+        })
+        $('form.main-image-form').submit(function (e) {
+            document.querySelector('.conversion-load').hidden = false
+            e.preventDefault()
+            var formData = new FormData(this);
+            console.log(formData)
+            $.ajax({
+                type: "post",
+                url: "/ajax/",
+                data: formData,
+                success: function (data) {
+                    //console.log(''+location.origin+data.success.file)
+                    if(data.success!= null){
+                        document.querySelector('.conversion-load').hidden = true
+                        document.querySelector('.conversion-success').hidden = false
+                        $('.converted-link').attr('href', data.success.file)
+                        console.log(data)
+                    }  
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        })
+    })
+</script>
+
+<body class="d-flex h-100 text-center text-bg-dark">
+    <div class="d-flex h-100 p-3 w-100 flex-column">
+        <header class="mb-auto">
+            <div>
+                <h3 class="float-md-start mb-0">Converter</h3>
+                <nav class="nav nav-masthead justify-content-center float-md-end">
+                    <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="#">Home</a>
+                    <a class="nav-link fw-bold py-1 px-0" href="#">About</a>
+                    <a class="nav-link fw-bold py-1 px-0" href="#">Contact</a>
+                </nav>
+            </div>
+        </header>
+        <div class="container">
+            <main class="px-3">
+                <!--Files Upload Frontend-->
+                <div class="container" style="max-width:fit-content;">
+                    <div class="upload-container">
+                        <div class="container">
+                            <div class="mb-3">
+                                <input class="form-control form-control-sm mx-auto" multiple="true" id="formFileSm"
+                                    type="file">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3 mx-auto" style="max-width:fit-content;">
+                        <select class="form-select form-select-sm" aria-label="Default select example">
+                            <option value="" selected>Convert to</option>
+                            <option value="jpg">JPG</option>
+                            <option value="png">PNG</option>
+                            <option value="webp">WEBP</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" id="upload-btn">Convert</button>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="spinner-border conversion-load" role="status" hidden>
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    <div class="conversion-success" hidden>
+                        <div class="input-group mb-3 input-group-sm justify-content-center">
+                            <span class="input-group-text">File converted</span>
+                            <a class="btn btn-primary btn-sm converted-link" href="" download>Download</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <form class="main-image-form" id="main-image-form" action="ajax/" hidden method="post"
+                    enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{form}}
+                    <input type="text" name="convert_to">
+                    <input type="submit" value="Submit">
+                </form>
+            </main>
+        </div>
+        <footer class="mt-auto text-white-50">All rights reserved © 2022. Nikhil Singla
+            <!-- JavaScript Bundle with Popper -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+                crossorigin="anonymous"></script>
+        </footer>
+    </div>
+</body>
+
+</html>
