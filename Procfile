@@ -1,1 +1,1 @@
-web: gunicorn app:app
+web: gunicorn imgConverter.wsgi --log-file -
