@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-d#0dmh71ad#@=6z8ct&a3&hi9i%8#v%)z6w49i@s9(#-fq6lsl"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'ondigitalocean.app']
 
